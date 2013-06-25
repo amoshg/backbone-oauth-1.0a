@@ -139,7 +139,6 @@
               base_str = that.baseString(method, base_uri, all_params);
 
               if(token_secret) token_secret = that.percentDecode(token_secret);
-          debugger;
           oauth_params.oauth_signature = that.signature(consumer_secret, token_secret, base_str) + "=";
 
           return that.authHeader(oauth_params);
@@ -229,11 +228,7 @@
         type: "GET",
         data : {oauth_callback:"oob"},
         success: function(res) { console.log(res); },                                                                                                                                                                                       
-        error: function(res) { 
-          var resObj = that.urlParamsToObj(res.responseText);
-
-          console.log("OAuth Token:" + resObj.oauth_token + " OAtuh Secret:" + resObj.oauth_token_secret); 
-        },
+        error: function(res) {  },
         beforeSend: function(xhr){
           this.url = this.url + "?" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
         },
