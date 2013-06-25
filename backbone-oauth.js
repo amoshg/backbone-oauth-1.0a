@@ -1,5 +1,7 @@
 /* 
  * Backbone oAuth 1.0a Implementation
+ * Version 1.0; Author Amin Moshgabadi (http://foresee.com) © 2013
+ * This software may be freely distributed under the MIT license.
  */
 
 (function(window) {
@@ -12,7 +14,16 @@
   Backbone.OAuth || (Backbone.OAuth = {});
 
   // The base OAuth class.
-  Backbone.OAuth = function(opts) {};
+  Backbone.OAuth = function(opts) {
+    this.consumer_key = opts.consumerKey;
+    this.consumer_secret = opts.consumerSecret;
+    this.requestURL = opts.requestURL;
+    this.authURL = opts.authURL;
+    this.accessURL = opts.accessURL; 
+    this.token = "";
+    this.tokenSecret = opts.tokenSecret || "";
+    this.verifier = "";
+  };
 
   //set the object prototype
   Backbone.OAuth.prototype = {
@@ -89,13 +100,13 @@
     //this is where the magic happens, this method does the actual header generation for our requests 
     headerGenerator : function(options) {
       options = options || {};
-      var consumer_key = options.consumer_key || '',
-          consumer_secret = options.consumer_secret || '',
-          signature_method = options.signature_method || '',
+      var consumer_key = options.consumer_key || this.consumer_key || '',
+          consumer_secret = options.consumer_secret || this.consumer_secret || '',
+          signature_method = options.signature_method || 'HMAC-SHA1',
           version = options.version || '1.0',
-          token = options.token || '',
-          token_secret = options.token_secret || '',
-          verifier= options.verifier || '';  
+          token = this.token || options.token || '',
+          token_secret = this.tokenSecret || options.token_secret || '',
+          verifier= this.verifier || options.verifier || '';  
 
       var that = this;
 
@@ -128,17 +139,107 @@
               base_str = that.baseString(method, base_uri, all_params);
 
               if(token_secret) token_secret = that.percentDecode(token_secret);
-
+          debugger;
           oauth_params.oauth_signature = that.signature(consumer_secret, token_secret, base_str) + "=";
 
           return that.authHeader(oauth_params);
       };
-    }, 
+    },
 
     //helper function to convert the response url parametrs to a JSON object
     urlParamsToObj : function(str){
       return JSON.parse('{"' + decodeURI(str).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
+    },
+    //gets the temp token and secret
+    getRequestToken : function(){
+      var hg =this.headerGenerator();
+      var that = this;
+      $.ajax({
+        type: "GET",
+        async: false,
+        data : {oauth_callback:location.href},
+        success: function(res) { 
+          var resObj = that.urlParamsToObj(res);
+          that.token = resObj.oauth_token; 
+          that.tokenSecret = resObj.oauth_token_secret;
+          if(Backbone.store){
+            //store our token info before leaving 
+            Backbone.store.set("tokenSecret",that.tokenSecret);
+          }
+          
+          //now redirect to service to authorize consumer 
+          window.location = that.authURL + "?oauth_token=" + resObj.oauth_token;
+        },                                                                                                                                                                                       
+        error: function(res) { },
+        beforeSend: function(xhr){
+          this.url = this.url + "&" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
+        },
+        url: this.requestURL,
+      });
+    },
+
+    constructCallbackURL: function(params, baseurl){
+      var str = "";
+       for (var key in params) {
+        if (str != "") {
+          str += "&";
+         }
+        str += key + "=" + params[key];
+       }
+      return baseurl + "?" + str;
+    },
+    //gets the access token given the tokensecret, this method should be called after the user has authenticated the consumer and a verifier has been supplied by the server
+    getAccessToken : function(tokenSecret){
+      var atoken = "";
+      if(tokenSecret){
+        this.tokenSecret = tokenSecret;
+      }
+      //the url params
+      var params = this.urlParamsToObj(window.location.search.replace(/\?/g,""));
+      //get the verifier from the url
+      this.verifier = params.oauth_verifier;
+      this.token = params.oauth_token;
+      var hg = this.headerGenerator();
+      var that = this;
+      $.ajax({
+        type: "GET",
+        async: false,
+        data : {oauth_token: this.token, verifier: this.verifier},
+        success: function(res) { atoken = that.urlParamsToObj(res).oauth_token },                                                                                                                                                                                       
+        error: function(res) { 
+          throw("error validating access token") 
+        },
+        beforeSend: function(xhr){
+          this.url = this.url + "&" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
+        },
+        url: this.accessURL,
+      });
+
+      return atoken;
     }
+    /*
+    //an example of how to request a protected end point after accesstoken is retrieved 
+    ,getProtectedEndpoint : function(url, tokenSecret, accessToken){
+      this.tokenSecret = tokenSecret;
+      this.token = accessToken
+      this.verifier = "";
+      var hg = this.headerGenerator();
+      var that = this;
+      $.ajax({
+        type: "GET",
+        data : {oauth_callback:"oob"},
+        success: function(res) { console.log(res); },                                                                                                                                                                                       
+        error: function(res) { 
+          var resObj = that.urlParamsToObj(res.responseText);
+
+          console.log("OAuth Token:" + resObj.oauth_token + " OAtuh Secret:" + resObj.oauth_token_secret); 
+        },
+        beforeSend: function(xhr){
+          this.url = this.url + "?" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
+        },
+        url: url,
+      });
+    } */
 
   };
 
