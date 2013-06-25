@@ -14,3 +14,47 @@ This library uses Ajax request to communicate with the server and do that handsh
 A simple example is as follows: 
 
     
+        //create a new oauth instance
+         var oauth = $.oauth = new app.OAuth({
+            consumerKey : "xxxxxxxxxxxxxxxxx",
+            consumerSecret: "xxxxxxxxxxxxxxxxxxx",
+            requestURL : "http://yourdomain.com/services/oauth/request_token",
+            authURL : "http://yourdomain.com/services/oauth/user_authorization",
+            accessURL : "http://yourdomain.com/services/oauth/access_token"
+        });
+        //get the access token if one exists
+        var atoken = window.localstorage.getItem("accessToken");
+        //do we have an access token and is the access token valid  && oauth.validateToken(atoken)
+       if(!(atoken)){
+           //if tokensecret exists then we have already verified the token
+           if(location.href.indexOf("oauth_verifier")>-1){
+               atoken = oauth.getAccessToken( window.localstorage.getItem("tokenSecret"));
+           } else{
+               //looks like we need to go grab an acces token
+               atoken = oauth.getRequestToken();
+           }
+          //store it in localstorage
+           window.localstorage..setItem("accessToken", atoken);
+        }
+        
+After the access token is retrieved then we can use it to make oauth requests using a method like below 
+
+    //an example of how to request a protected end point after accesstoken is retrieved 
+    getProtectedEndpoint : function(url, tokenSecret, accessToken){
+      this.tokenSecret = tokenSecret;
+      this.token = accessToken
+      this.verifier = "";
+      var hg = this.headerGenerator();
+      var that = this;
+      $.ajax({
+        type: "GET",
+        data : {oauth_callback:"oob"},
+        success: function(res) { console.log(res); },                                                                                                                                                                                       
+        error: function(res) {},
+        beforeSend: function(xhr){
+          this.url = this.url + "?" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
+        },
+        url: url,
+      });
+    } 
+        
