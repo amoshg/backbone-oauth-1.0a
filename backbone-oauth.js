@@ -157,6 +157,9 @@
         type: "GET",
         async: false,
         data : {oauth_callback:location.href},
+         xhrFields: {
+          withCredentials: true
+        },
         success: function(res) { 
           var resObj = that.urlParamsToObj(res);
           that.token = resObj.oauth_token; 
@@ -204,6 +207,9 @@
         type: "GET",
         async: false,
         data : {oauth_token: this.token, verifier: this.verifier},
+         xhrFields: {
+       withCredentials: true
+         },
         success: function(res) { atoken = that.urlParamsToObj(res).oauth_token },                                                                                                                                                                                       
         error: function(res) { 
           throw("error validating access token") 
@@ -216,9 +222,9 @@
 
       return atoken;
     }
-    /*
+    
     //an example of how to request a protected end point after accesstoken is retrieved 
-    ,getProtectedEndpoint : function(url, tokenSecret, accessToken){
+    ,apiRequest : function(url, tokenSecret, accessToken, options){
       this.tokenSecret = tokenSecret;
       this.token = accessToken
       this.verifier = "";
@@ -227,15 +233,40 @@
       $.ajax({
         type: "GET",
         data : {oauth_callback:"oob"},
-        success: function(res) { console.log(res); },                                                                                                                                                                                       
-        error: function(res) {  },
+         xhrFields: {
+       withCredentials: true
+    },
+        success: function(res) { options.success(res) },                                                                                                                                                                                       
+        error: function(res) { options.error(error) },
         beforeSend: function(xhr){
           this.url = this.url + "?" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
         },
         url: url,
       });
-    } */
+    }
 
+  };
+
+
+  //extend backbone sync to use our methods
+  Backbone.sync = function(method, model, options) {
+    switch (method) { 
+      case 'create':
+        debugger;
+      break;
+
+      case 'update':
+        debugger;
+      break;
+
+      case 'delete':
+        debugger;
+      break;
+
+      case 'read':
+       $.oauth.apiRequest($.serverRoot + this.url, Backbone.store.get("tokenSecret"), Backbone.store.get("accessToken"), options);
+      break;
+    }
   };
 
 
