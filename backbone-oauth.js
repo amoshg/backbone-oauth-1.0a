@@ -191,7 +191,7 @@
       return baseurl + "?" + str;
     },
     //gets the access token given the tokensecret, this method should be called after the user has authenticated the consumer and a verifier has been supplied by the server
-    getAccessToken : function(tokenSecret){
+    getAccessToken : function(tokenSecret, clbk){
       var atoken = "";
       if(tokenSecret){
         this.tokenSecret = tokenSecret;
@@ -210,7 +210,7 @@
          xhrFields: {
        withCredentials: true
          },
-        success: function(res) { atoken = that.urlParamsToObj(res).oauth_token },                                                                                                                                                                                       
+        success: function(res) { clbk(that.urlParamsToObj(res).oauth_token) },                                                                                                                                                                                       
         error: function(res) { 
           throw("error validating access token") 
         },
@@ -236,8 +236,16 @@
          xhrFields: {
        withCredentials: true
     },
-        success: function(res) { options.success(res) },                                                                                                                                                                                       
-        error: function(res) { options.error(error) },
+        success: function(res) { 
+          if(typeof res === "string"){
+            that.token = "";
+            that.tokenSecret = "";
+            that.getRequestToken();
+          }else{
+          options.success(res) }
+        },                                                                                                                                                                                       
+        error: function(res) { 
+          options.error(error) },
         beforeSend: function(xhr){
           this.url = this.url + "?" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
         },
@@ -245,8 +253,7 @@
       });
     }
 
-  };
-
+  },
 
   //extend backbone sync to use our methods
   Backbone.sync = function(method, model, options) {
