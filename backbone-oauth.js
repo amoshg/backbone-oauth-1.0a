@@ -151,11 +151,11 @@
     },
     //gets the temp token and secret
     getRequestToken : function(){
+      debugger;
       var hg =this.headerGenerator();
       var that = this;
       $.ajax({
         type: "GET",
-        async: false,
         data : {oauth_callback:location.href},
          xhrFields: {
           withCredentials: true
@@ -168,11 +168,12 @@
             //store our token info before leaving 
             Backbone.store.set("tokenSecret",that.tokenSecret);
           }
-          
           //now redirect to service to authorize consumer 
           window.location.replace(that.authURL + "?oauth_token=" + resObj.oauth_token);
         },                                                                                                                                                                                       
-        error: function(res) { },
+        error: function(res) {
+        alert("could not get request token");
+         },
         beforeSend: function(xhr){
           this.url = this.url + "&" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
         },
@@ -205,7 +206,6 @@
       var that = this;
       $.ajax({
         type: "GET",
-        async: false,
         data : {oauth_token: this.token, verifier: this.verifier},
          xhrFields: {
        withCredentials: true
