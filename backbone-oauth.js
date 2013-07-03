@@ -10,6 +10,8 @@
   // Quick refrence backbone
   var Backbone = window.Backbone;
 
+  var isBusy = false;
+
   // Extend Backbone with OAuth functionality.
   Backbone.OAuth || (Backbone.OAuth = {});
 
@@ -151,33 +153,38 @@
     },
     //gets the temp token and secret
     getRequestToken : function(){
-      var hg =this.headerGenerator();
-      var that = this;
-      $.ajax({
-        type: "GET",
-        data : {oauth_callback:location.href},
-         xhrFields: {
-          withCredentials: true
-        },
-        success: function(res) { 
-          var resObj = that.urlParamsToObj(res);
-          that.token = resObj.oauth_token; 
-          that.tokenSecret = resObj.oauth_token_secret;
-          if(Backbone.store){
-            //store our token info before leaving 
-            Backbone.store.set("tokenSecret",that.tokenSecret);
-          }
-          //now redirect to service to authorize consumer 
-          window.location.replace(that.authURL + "?oauth_token=" + resObj.oauth_token);
-        },                                                                                                                                                                                       
-        error: function(res) {
-        alert("could not get request token");
-         },
-        beforeSend: function(xhr){
-          this.url = this.url + "&" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
-        },
-        url: this.requestURL,
-      });
+      if(!isBusy){
+        isBusy = true;
+        var hg =this.headerGenerator();
+        var that = this;
+        $.ajax({
+          type: "GET",
+          data : {oauth_callback:location.href},
+           xhrFields: {
+            withCredentials: true
+          },
+          success: function(res) { 
+            isBusy = false;
+            var resObj = that.urlParamsToObj(res);
+            that.token = resObj.oauth_token; 
+            that.tokenSecret = resObj.oauth_token_secret;
+            if(Backbone.store){
+              //store our token info before leaving 
+              Backbone.store.set("tokenSecret",that.tokenSecret);
+            }
+            //now redirect to service to authorize consumer 
+            window.location.replace(that.authURL + "?oauth_token=" + resObj.oauth_token);
+          },                                                                                                                                                                                       
+          error: function(res) {
+            isBusy = false;
+            window.location.replace($.serverRoot + "/index.html");
+           },
+          beforeSend: function(xhr){
+            this.url = this.url + "&" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
+          },
+          url: this.requestURL,
+        });
+    }
     },
 
     constructCallbackURL: function(params, baseurl){
