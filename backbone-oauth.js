@@ -245,7 +245,9 @@
           options.success(res) }
         },                                                                                                                                                                                       
         error: function(res) { 
-          options.error(error) },
+          Backbone.store.clear();
+          window.location.reload();
+        },
         beforeSend: function(xhr){
           this.url = this.url + "?" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
         },
