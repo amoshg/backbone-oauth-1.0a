@@ -151,7 +151,6 @@
     },
     //gets the temp token and secret
     getRequestToken : function(){
-      debugger;
       var hg =this.headerGenerator();
       var that = this;
       $.ajax({
