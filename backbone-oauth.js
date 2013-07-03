@@ -218,7 +218,7 @@
          },
         success: function(res) { clbk(that.urlParamsToObj(res).oauth_token) },                                                                                                                                                                                       
         error: function(res) { 
-          throw("error validating access token") 
+          throw("error validating access token");
         },
         beforeSend: function(xhr){
           this.url = this.url + "&" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
@@ -251,8 +251,7 @@
           options.success(res) }
         },                                                                                                                                                                                       
         error: function(res) { 
-          Backbone.store.clear();
-          window.location.reload();
+          throw("error getting resource");
         },
         beforeSend: function(xhr){
           this.url = this.url + "?" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
