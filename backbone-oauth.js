@@ -170,7 +170,7 @@
           }
           
           //now redirect to service to authorize consumer 
-          window.location = that.authURL + "?oauth_token=" + resObj.oauth_token;
+          window.location.replace(that.authURL + "?oauth_token=" + resObj.oauth_token);
         },                                                                                                                                                                                       
         error: function(res) { },
         beforeSend: function(xhr){
