@@ -239,9 +239,9 @@
       $.ajax({
         type: "GET",
         data : {oauth_callback:"oob"},
-         xhrFields: {
-       withCredentials: true
-    },
+        xhrFields: {
+        withCredentials: true
+        },
         success: function(res) { 
           if(typeof res === "string"){
             that.token = "";
@@ -251,7 +251,7 @@
           options.success(res) }
         },                                                                                                                                                                                       
         error: function(res) { 
-          throw("error getting resource");
+          throw("error getting the ");
         },
         beforeSend: function(xhr){
           this.url = this.url + "?" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
