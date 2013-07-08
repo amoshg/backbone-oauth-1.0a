@@ -65,24 +65,68 @@
     },
 
     //converts the given object to a string
+    //parts taken from 
     qsString : function(obj) {
       var that = this;
-      var str = Object.keys(obj).sort().map(function(key) {
-          return that.percentEncode(key) + '=' +
-              that.percentEncode(obj[key]);
-      }).join('&');
+      var str = "";
+      //sort the passed object 
+      var sorted = this.sortObject(obj);
 
-      return str;
+      var form = "";
+      //form encode the sorted object 
+      for (var p = 0; p < sorted.length; ++p) {
+          var value = sorted[p][1];
+          if (value == null) value = "";
+          if (form != "") form += '&';
+          form += this.percentEncode(sorted[p][0])
+            +'='+ this.percentEncode(value);
+      }
+
+        return form;
+
     },
 
+    sortObject : function(obj){
+      var list = [];
+        for (var p in obj) {
+            list.push([p, obj[p]]);
+        }
+        //sort the list
+          var sortable = [];
+          for (var p = 0; p < list.length; ++p) {
+              var nvp = list[p];
+            
+                  sortable.push([ this.percentEncode(nvp[0])
+                                + " " // because it comes before any character that can appear in a percentEncoded string.
+                                + this.percentEncode(nvp[1])
+                                , nvp]);
+              
+          }
+          sortable.sort(function(a,b) {
+                            if (a[0] < b[0]) return  -1;
+                            if (a[0] > b[0]) return 1;
+                            return 0;
+                        });
+          var sorted = [];
+          for (var s = 0; s < sortable.length; ++s) {
+              sorted.push(sortable[s][1]);
+          }
+      return sorted;
+  },
+
     //converts the string to an object
-    stringQs : function(str) {
-      return str.split('&').reduce(function(obj, pair){
-          var parts = pair.split('=');
-          obj[decodeURIComponent(parts[0])] = (null === parts[1]) ?
-              '' : decodeURIComponent(parts[1]);
-          return obj;
-      }, {});
+    stringQs : function(s) {
+      var query = {};
+
+      s.replace(/\b([^&=]*)=([^&=]*)\b/g, function (m, a, d) {
+        if (typeof query[a] != 'undefined') {
+          query[a] += ',' + d;
+        } else {
+          query[a] = d;
+        }
+      });
+
+     return query;
     },
 
     //the HMAC-SHA1 Signature
@@ -94,10 +138,23 @@
           baseString);
       },
     //the auth header
-    authHeader : function(obj) {
-      return Object.keys(obj).sort().map(function(key) {
-          return encodeURIComponent(key) + '="' + encodeURIComponent(obj[key]) + '"';
-      }).join(', ');
+    authHeader : function(obj, urlParam) {
+      var str = "";
+
+      if(urlParam){
+        str = "";
+      }else{
+        str = "OAuth ";
+      }
+
+     var that = this;
+     var sorted = this.sortObject(obj);
+     for(var i=0;i<sorted.length;i++){
+      str += that.percentEncode(sorted[i][0]) + '="' + that.percentEncode(sorted[i][1]) + '", '
+     }
+
+     return str.slice(0,str.length-2);
+
     },
     //this is where the magic happens, this method does the actual header generation for our requests 
     headerGenerator : function(options) {
@@ -112,7 +169,7 @@
 
       var that = this;
 
-      return function(method, uri, extra_params) {
+      return function(method, uri, extra_params, special) {
           method = method.toUpperCase();
           if (typeof extra_params === 'string' && extra_params.length > 0) {
               extra_params = that.stringQs(extra_params);
@@ -141,9 +198,11 @@
               base_str = that.baseString(method, base_uri, all_params);
 
               if(token_secret) token_secret = that.percentDecode(token_secret);
-          oauth_params.oauth_signature = that.signature(consumer_secret, token_secret, base_str) + "=";
+          oauth_params.oauth_signature = that.signature(consumer_secret, token_secret, base_str);
+          var res = {};
+          var auth_params =  (extra_params?_.extend({}, extra_params, oauth_params):oauth_params);
 
-          return that.authHeader(oauth_params);
+          return auth_params;
       };
     },
 
@@ -159,10 +218,11 @@
         var that = this;
         $.ajax({
           type: "GET",
-          data : {oauth_callback:location.href},
+          data : {},
            xhrFields: {
             withCredentials: true
           },
+           //crossDomain: false,
           success: function(res) { 
             isBusy = false;
             var resObj = that.urlParamsToObj(res);
@@ -177,10 +237,14 @@
           },                                                                                                                                                                                       
           error: function(res) {
             isBusy = false;
-            window.location.replace($.serverRoot + "/index.html");
+           // window.location.replace($.serverRoot + "/index.html");
            },
           beforeSend: function(xhr){
-            this.url = this.url + "&" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
+            if($.browser.msie){
+              this.url = this.url + "?" + that.authHeader(hg("get",this.url,"oauth_callback=" + location.href),true).replace(/"/g,"").replace(/, /g,"&");
+            }else{
+              xhr.setRequestHeader("Authorization",that.authHeader(hg("get",this.url,"oauth_callback=" + location.href)));
+            }
           },
           url: this.requestURL,
         });
@@ -216,12 +280,25 @@
          xhrFields: {
        withCredentials: true
          },
-        success: function(res) { clbk(that.urlParamsToObj(res).oauth_token) },                                                                                                                                                                                       
+      //  crossDomain: false,
+        success: function(res) {
+
+         //   that.tokenSecret = that.urlParamsToObj(res).oauth_token_secret;
+            if(Backbone.store){
+              //store our token info before leaving 
+             Backbone.store.set("tokenSecret",that.urlParamsToObj(res).oauth_token_secret);
+            }
+
+         clbk(that.urlParamsToObj(res).oauth_token) },                                                                                                                                                                                       
         error: function(res) { 
           throw("error validating access token");
         },
         beforeSend: function(xhr){
-          this.url = this.url + "&" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
+           if($.browser.msie){
+              this.url = this.url + "&" + that.authHeader(hg("get",this.url,""),true).replace(/"/g,"").replace(/, /g,"&");
+            }else{
+              xhr.setRequestHeader("Authorization",that.authHeader(hg("get",this.url,"")));
+            }
         },
         url: this.accessURL,
       });
@@ -238,10 +315,11 @@
       var that = this;
       $.ajax({
         type: "GET",
-        data : {oauth_callback:"oob"},
-        xhrFields: {
-        withCredentials: true
-        },
+        data : {},
+         xhrFields: {
+       withCredentials: true
+      },
+    //    crossDomain: false,
         success: function(res) { 
           if(typeof res === "string"){
             that.token = "";
@@ -251,37 +329,19 @@
           options.success(res) }
         },                                                                                                                                                                                       
         error: function(res) { 
-          throw("error getting the ");
+          throw("error grabbing resource");
         },
         beforeSend: function(xhr){
-          this.url = this.url + "?" + hg("get",this.url,"").replace(/"/g,"").replace(/, /g,"&");
+              if($.browser.msie){
+              this.url = this.url + "?" + that.authHeader(hg("get",this.url,""),true).replace(/"/g,"").replace(/, /g,"&");
+            }else{
+              xhr.setRequestHeader("Authorization",that.authHeader(hg("get",this.url,"")));
+            }
         },
         url: url,
       });
     }
 
-  },
-
-  //extend backbone sync to use our methods
-  Backbone.sync = function(method, model, options) {
-    switch (method) { 
-      case 'create':
-        debugger;
-      break;
-
-      case 'update':
-        debugger;
-      break;
-
-      case 'delete':
-        debugger;
-      break;
-
-      case 'read':
-       $.oauth.apiRequest($.serverRoot + this.url, Backbone.store.get("tokenSecret"), Backbone.store.get("accessToken"), options);
-      break;
-    }
-  };
-
+  }
 
 })(this);
