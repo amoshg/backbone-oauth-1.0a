@@ -220,7 +220,7 @@
           type: "GET",
           data : {},
            xhrFields: {
-            withCredentials: true
+            withCredentials: false
           },
            //crossDomain: false,
           success: function(res) { 
@@ -278,7 +278,7 @@
         type: "GET",
         data : {oauth_token: this.token, verifier: this.verifier},
          xhrFields: {
-       withCredentials: true
+       withCredentials: false
          },
       //  crossDomain: false,
         success: function(res) {
@@ -317,7 +317,7 @@
         type: "GET",
         data : {},
          xhrFields: {
-       withCredentials: true
+       withCredentials: false
       },
     //    crossDomain: false,
         success: function(res) { 
@@ -329,7 +329,8 @@
           options.success(res) }
         },                                                                                                                                                                                       
         error: function(res) { 
-          throw("error grabbing resource");
+          alert("rero");
+          //options.error();
         },
         beforeSend: function(xhr){
               if($.browser.msie){
