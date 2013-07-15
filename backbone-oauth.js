@@ -247,6 +247,10 @@
 
                 oauth_params.oauth_version = version;
 
+                //decode query parametrs
+                for(var key in query_params){
+                  query_params[key] = that.percentDecode(query_params[key]);
+                }
 
                 var all_params = _.extend({}, oauth_params, query_params, extra_params),
                     base_str = that.baseString(method, base_uri, all_params);
@@ -391,6 +395,7 @@
             this.tokenSecret = tokenSecret;
             this.token = accessToken
             this.verifier = "";
+            this.dataObj = options.data;
             var hg = this.headerGenerator();
             var that = this;
             $.ajax({
@@ -415,6 +420,10 @@
                     }
                 },
                 beforeSend: function (xhr) {
+                   if(that.dataObj){
+                        var queryString = that.qsString(that.dataObj);
+                        this.url = this.url + "?" + queryString;
+                      }
                     if ($.browser.msie) {
                         this.url = this.url + "?" + that.authHeader(hg("get", this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
                     } else {
