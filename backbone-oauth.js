@@ -407,9 +407,9 @@
                 //    crossDomain: false,
                 success: function (res) {
                     if (typeof res === "string") {
-                        that.token = "";
-                        that.tokenSecret = "";
-                        that.getRequestToken();
+                       // that.token = "";
+                       // that.tokenSecret = "";
+                       // that.getRequestToken();
                     } else {
                         options.success(res)
                     }
@@ -425,7 +425,11 @@
                         this.url = this.url + "?" + queryString;
                       }
                     if ($.browser.msie) {
-                        this.url = this.url + "?" + that.authHeader(hg("get", this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
+                      var sep = "?";
+                      if(this.url.indexOf("?")>-1){
+                        sep = "&";
+                      }
+                        this.url = this.url + sep + that.authHeader(hg("get", this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
                     } else {
                         xhr.setRequestHeader("Authorization", that.authHeader(hg("get", this.url, "")));
                     }
