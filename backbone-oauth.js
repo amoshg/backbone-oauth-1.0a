@@ -416,7 +416,7 @@
 
             $.ajax({
                 type: reqType,
-                data: {saveData},
+                data: saveData,
                 xhrFields: {
                     withCredentials: false
                 },
