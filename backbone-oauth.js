@@ -420,7 +420,7 @@
                 xhrFields: {
                     withCredentials: false
                 },
-                contentType: "text/xml; charset=UTF-8",
+                contentType: "application/json; charset=utf-8",
                 //    crossDomain: false,
                 success: function (res) {
                     if (typeof res === "string") {
