@@ -420,6 +420,7 @@
                 xhrFields: {
                     withCredentials: false
                 },
+                contentType: "text/xml",
                 //    crossDomain: false,
                 success: function (res) {
                     if (typeof res === "string") {
