@@ -392,15 +392,31 @@
          * @param options
          */
         apiRequest: function (url, tokenSecret, accessToken, options) {
+          var reqType = "";
+          //set the request type
+          if(options.type)
+          {
+            reqType = options.type;
+          }else{
+            reqType = "GET";
+          }
+
             this.tokenSecret = tokenSecret;
             this.token = accessToken
             this.verifier = "";
             this.dataObj = options.data;
             var hg = this.headerGenerator();
             var that = this;
+
+            var saveData = "";
+
+            if(reqType != "GET"){
+              saveData = options.data;
+            } 
+
             $.ajax({
-                type: "GET",
-                data: {},
+                type: reqType,
+                data: {saveData},
                 xhrFields: {
                     withCredentials: false
                 },
@@ -420,7 +436,7 @@
                     }
                 },
                 beforeSend: function (xhr) {
-                   if(that.dataObj){
+                   if(that.dataObj && reqType == "GET"){
                         var queryString = that.qsString(that.dataObj);
                         this.url = this.url + "?" + queryString;
                       }
