@@ -445,9 +445,9 @@
                       if(this.url.indexOf("?")>-1){
                         sep = "&";
                       }
-                        this.url = this.url + sep + that.authHeader(hg("get", this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
+                        this.url = this.url + sep + that.authHeader(hg(reqType, this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
                     } else {
-                        xhr.setRequestHeader("Authorization", that.authHeader(hg("get", this.url, "")));
+                        xhr.setRequestHeader("Authorization", that.authHeader(hg(reqType, this.url, "")));
                     }
                 },
                 url: url
