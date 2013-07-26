@@ -421,6 +421,7 @@
                     withCredentials: false
                 },
                 contentType: "application/json; charset=utf-8",
+                processData: false,
                 //    crossDomain: false,
                 success: function (res) {
                     if (typeof res === "string") {
