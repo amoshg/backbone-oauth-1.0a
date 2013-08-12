@@ -306,9 +306,9 @@
                     },
                     beforeSend: function (xhr) {
                         if ($.browser.msie) {
-                            this.url = this.url + "?" + that.authHeader(hg("get", this.url, "oauth_callback=" + location.href), true).replace(/"/g, "").replace(/, /g, "&");
+                            this.url = this.url + "?" + that.authHeader(hg("get", window.location.origin + this.url, "oauth_callback=" + location.href), true).replace(/"/g, "").replace(/, /g, "&");
                         } else {
-                            xhr.setRequestHeader("Authorization", that.authHeader(hg("get", this.url, "oauth_callback=" + location.href)));
+                            xhr.setRequestHeader("Authorization", that.authHeader(hg("get", window.location.origin + this.url, "oauth_callback=" + location.href)));
                         }
                     },
                     url: this.requestURL
@@ -373,9 +373,9 @@
                 },
                 beforeSend: function (xhr) {
                     if ($.browser.msie) {
-                        this.url = this.url + "&" + that.authHeader(hg("get", this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
+                        this.url = this.url + "&" + that.authHeader(hg("get", window.location.origin + this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
                     } else {
-                        xhr.setRequestHeader("Authorization", that.authHeader(hg("get", this.url, "")));
+                        xhr.setRequestHeader("Authorization", that.authHeader(hg("get",window.location.origin + this.url, "")));
                     }
                 },
                 url: this.accessURL
@@ -447,9 +447,9 @@
                       if(this.url.indexOf("?")>-1){
                         sep = "&";
                       }
-                        this.url = this.url + sep + that.authHeader(hg(reqType, this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
+                        this.url = this.url + sep + that.authHeader(hg(reqType, window.location.origin + this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
                     } else {
-                        xhr.setRequestHeader("Authorization", that.authHeader(hg(reqType, this.url, "")));
+                        xhr.setRequestHeader("Authorization", that.authHeader(hg(reqType, window.location.origin + this.url, "")));
                     }
                 },
                 url: url
