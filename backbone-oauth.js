@@ -437,6 +437,9 @@
                         options.error.call(this, res);
                     }
                 },
+				
+				complete: options.complete,
+				
                 beforeSend: function (xhr) {
                    if(that.dataObj && reqType == "GET"){
                         var queryString = that.qsString(that.dataObj);
