@@ -16,6 +16,12 @@
     // Extend Backbone with OAuth functionality.
     Backbone.OAuth || (Backbone.OAuth = {});
 
+    //ie does not have window location origin
+    if (!window.location.origin){
+        window.location.origin = window.location.protocol+"//"+window.location.host; 
+    }
+
+
     /**
      * The base OAuth class.
      * @param opts
