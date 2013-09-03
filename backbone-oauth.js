@@ -287,7 +287,7 @@
                 isBusy = true;
                 var hg = this.headerGenerator();
                 var that = this;
-                $.ajax({
+                return $.ajax({
                     type: "GET",
                     data: {},
                     xhrFields: {
@@ -357,7 +357,7 @@
             this.token = params.oauth_token;
             var hg = this.headerGenerator();
             var that = this;
-            $.ajax({
+            return $.ajax({
                 type: "GET",
                 data: {oauth_token: this.token, verifier: this.verifier},
                 xhrFields: {
@@ -420,7 +420,7 @@
               saveData = options.data;
             } 
 
-            $.ajax({
+            return $.ajax({
                 type: reqType,
                 data: saveData,
                 xhrFields: {
