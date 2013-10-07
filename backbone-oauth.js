@@ -351,7 +351,12 @@
                 this.tokenSecret = tokenSecret;
             }
             // the url params
-            var params = this.urlParamsToObj(window.location.search.replace(/\?/g, ""));
+			var surl = window.location.search || window.location.hash,
+				qindex = surl.indexOf('?');
+			if (qindex> -1) {
+				surl = surl.substr(qindex + 1);
+			}
+            var params = this.urlParamsToObj(surl.replace(/\?/g, ""));
             // get the verifier from the url
             this.verifier = params.oauth_verifier;
             this.token = params.oauth_token;
