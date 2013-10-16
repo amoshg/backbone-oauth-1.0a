@@ -275,8 +275,8 @@
          * @param str
          * @returns {*}
          */
-        urlParamsToObj: function (str) {
-            return JSON.parse('{"' + decodeURI(str).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}');
+	urlParamsToObj: function (str) {
+            return str ? JSON.parse('{"' + decodeURI(str).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}') : {};
         },
 
         /**
