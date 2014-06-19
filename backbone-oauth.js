@@ -434,15 +434,7 @@
                 contentType: "application/json; charset=utf-8",
                 processData: false,
                 //    crossDomain: false,
-                success: function (res) {
-                    if (typeof res === "string") {
-                       // that.token = "";
-                       // that.tokenSecret = "";
-                       // that.getRequestToken();
-                    } else {
-                        options.success(res)
-                    }
-                },
+                success: options.success,
                 error: function (res) {
                     if (options.error) {
                         options.error.call(this, res);
