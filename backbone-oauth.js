@@ -282,7 +282,7 @@
         /**
          * Gets the temp token and secret
          */
-        getRequestToken: function () {
+        getRequestToken: function (store) {
             if (!isBusy) {
                 isBusy = true;
                 var hg = this.headerGenerator();
@@ -299,9 +299,9 @@
                         var resObj = that.urlParamsToObj(res);
                         that.token = resObj.oauth_token;
                         that.tokenSecret = resObj.oauth_token_secret;
-                        if (Backbone.store) {
+                        if (store) {
                             // store our token info before leaving
-                            Backbone.store.set("tokenSecret", that.tokenSecret);
+                            store.set("tokenSecret", that.tokenSecret);
                         }
                         // now redirect to service to authorize consumer
                         window.location.replace(that.authURL + "?oauth_token=" + resObj.oauth_token);
@@ -341,12 +341,13 @@
 
         /**
          * gets the access token given the tokensecret, this method should be called after the user has authenticated the consumer and a verifier has been supplied by the server
-         * @param tokenSecret
+         * @param store
          * @param clbk
          * @returns {string}
          */
-        getAccessToken: function (tokenSecret, clbk) {
-            var atoken = "";
+        getAccessToken: function (store, clbk) {
+            var tokenSecret = store.get("tokenSecret");
+
             if (tokenSecret) {
                 this.tokenSecret = tokenSecret;
             }
@@ -372,9 +373,9 @@
                 success: function (res) {
 
                     //   that.tokenSecret = that.urlParamsToObj(res).oauth_token_secret;
-                    if (Backbone.store) {
+                    if (store) {
                         // store our token info before leaving
-                        Backbone.store.set("tokenSecret", that.urlParamsToObj(res).oauth_token_secret);
+                        store.set("tokenSecret", that.urlParamsToObj(res).oauth_token_secret);
                     }
 
                     clbk(that.urlParamsToObj(res).oauth_token)
@@ -392,7 +393,7 @@
                 url: this.accessURL
             });
 
-            return atoken;
+            return tokenSecret;
         },
 
         /**
