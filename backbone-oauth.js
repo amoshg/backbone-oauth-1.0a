@@ -275,7 +275,7 @@
          * @param str
          * @returns {*}
          */
-	urlParamsToObj: function (str) {
+        urlParamsToObj: function (str) {
             return str ? JSON.parse('{"' + decodeURI(str).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}') : {};
         },
 
@@ -312,12 +312,12 @@
                     },
                     beforeSend: function (xhr) {
                         if ($.browser.msie) {
-                            this.url = this.url + "?" + that.authHeader(hg("get", window.location.origin + this.url, "oauth_callback=" + location.href), true).replace(/"/g, "").replace(/, /g, "&");
+                            this.url = this.url + "?" + that.authHeader(hg("get", this.url, "oauth_callback=" + location.href), true).replace(/"/g, "").replace(/, /g, "&");
                         } else {
-                            xhr.setRequestHeader("Authorization", that.authHeader(hg("get", window.location.origin + this.url, "oauth_callback=" + location.href)));
+                            xhr.setRequestHeader("Authorization", that.authHeader(hg("get", this.url, "oauth_callback=" + location.href)));
                         }
                     },
-                    url: this.requestURL
+                    url: (this.requestURL.indexOf('http') === 0) ? this.requestURL : window.location.origin + this.requestURL
                 });
             }
         },
@@ -385,12 +385,12 @@
                 },
                 beforeSend: function (xhr) {
                     if ($.browser.msie) {
-                        this.url = this.url + "&" + that.authHeader(hg("get", window.location.origin + this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
+                        this.url = this.url + "&" + that.authHeader(hg("get", this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
                     } else {
-                        xhr.setRequestHeader("Authorization", that.authHeader(hg("get",window.location.origin + this.url, "")));
+                        xhr.setRequestHeader("Authorization", that.authHeader(hg("get", this.url, "")));
                     }
                 },
-                url: this.accessURL
+                url: (this.accessURL.indexOf("http") === 0) ? this.accessURL : window.location.origin + this.accessURL
             });
 
             return tokenSecret;
@@ -454,12 +454,12 @@
                       if(this.url.indexOf("?")>-1){
                         sep = "&";
                       }
-                        this.url = this.url + sep + that.authHeader(hg(reqType, window.location.origin + this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
+                        this.url = this.url + sep + that.authHeader(hg(reqType, this.url, ""), true).replace(/"/g, "").replace(/, /g, "&");
                     } else {
-                        xhr.setRequestHeader("Authorization", that.authHeader(hg(reqType, window.location.origin + this.url, "")));
+                        xhr.setRequestHeader("Authorization", that.authHeader(hg(reqType,  this.url, "")));
                     }
                 },
-                url: url
+                url: (url.indexOf('http') === 0) ? url : window.location.origin + url
             });
         }
     };
