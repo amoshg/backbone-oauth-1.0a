@@ -435,12 +435,6 @@
                 contentType: options.contentType || "application/json; charset=utf-8",
                 processData: options.processData || false,
                 //    crossDomain: false,
-                error: function (res) {
-                    if (options.error) {
-                        options.error.call(this, res);
-                    }
-                },
-				
                 beforeSend: function (xhr) {
                    if(that.dataObj && reqType == "GET"){
                         var queryString = that.qsString(that.dataObj);
