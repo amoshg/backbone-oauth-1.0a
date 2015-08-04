@@ -426,23 +426,20 @@
               saveData = options.data;
             } 
 
-            return $.ajax({
+            return $.ajax(_.extend(options, {
                 type: reqType,
                 data: saveData,
                 xhrFields: {
                     withCredentials: false
                 },
-                contentType: "application/json; charset=utf-8",
-                processData: false,
+                contentType: options.contentType || "application/json; charset=utf-8",
+                processData: options.processData || false,
                 //    crossDomain: false,
-                success: options.success,
                 error: function (res) {
                     if (options.error) {
                         options.error.call(this, res);
                     }
                 },
-				
-				complete: options.complete,
 				
                 beforeSend: function (xhr) {
                    if(that.dataObj && reqType == "GET"){
@@ -460,7 +457,7 @@
                     }
                 },
                 url: (url.indexOf('http') === 0) ? url : window.location.origin + url
-            });
+            }));
         }
     };
 
