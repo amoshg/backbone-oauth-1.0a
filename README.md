@@ -7,7 +7,7 @@ This library is designed to implement a pure javascript oauth 1.0a. There are a 
 
 -----------------------------------------------------------------------------------------------------------
 
-Before getting started make sure you know the oauth 1.0a flow --> (http://www.cubrid.org/files/attach/images/220547/370/421/oauth_10a_authentication_process.png)
+Before getting started make sure you know the oauth 1.0a flow --> (http://oauth.net/core/diagram.png)
 
 This library uses Ajax request to communicate with the server and do that handshake. It assumes that both parties are on the same domain (in most cases this is not true). Eitehr CORS or JSONP method could be used to get around the same-origin-policy.
 
